@@ -3,20 +3,11 @@ import { handleClientScriptLoad } from "next/script";
 import React, { useEffect } from "react";
 import axios from "../../_lib/axios/axios";
 import { convertToObject } from "typescript";
-import { SunspotLoader } from "react-awesome-loaders";
-export const SunspotLoaderComponent = () => {
-  return (
-    <>
-      <SunspotLoader
-        gradientColors={["#6366F1", "#E0E7FF"]}
-        shadowColor={"#3730A3"}
-        desktopSize={"128px"}
-        mobileSize={"100px"}
-      />
-    </>
-  );
-};
+
 function Proper({ currentPatient, existmodel, modelopen }) {
+  console.log(currentPatient);
+  localStorage.setItem("currentPatient_Physio", JSON.stringify(currentPatient));
+
   console.log(currentPatient, existmodel, modelopen.replace(/'/g, ""));
   return (
     <>
@@ -51,11 +42,20 @@ function Proper({ currentPatient, existmodel, modelopen }) {
             </span>{" "}
             Does not exist in the system. Please click to proceed to creation
           </p>
-          <div className="modal-action">
+          <div className="modal-action flex items-centers justify-between ">
             <form method="dialog">
               {/* if there is a button in form, it will close the modal */}
               <button className="btn">Close</button>
             </form>
+            <button
+              className="btn"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("form_model_proper").showModal();
+              }}
+            >
+              Proceed
+            </button>
           </div>
         </div>
       </dialog>
@@ -70,10 +70,124 @@ function Proper({ currentPatient, existmodel, modelopen }) {
       >
         open modal
       </button>
-      <dialog id="my_modal_1" className="modal">
+    </>
+  );
+}
+function FormProper() {
+  // get from local storage
+  const currentPatient = JSON.parse(
+    localStorage.getItem("currentPatient_Physio")
+  );
+
+  return (
+    <div>
+      <dialog id="form_model_proper" className="modal">
         <div className="modal-box   bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-          <h3 className="font-bold text-lg">Hello!</h3>
-          <p className="py-4"></p>
+          <h3 className="font-bold text-lg">Create Patient</h3>
+
+          <p className="py-4 text-xl text-black">
+            <form>
+              <div className="mb-4.5 flex flex-col ">
+                <div className="flex items-center  space-x-4">
+                  <div>
+                    <label className="mb-2.5 block text-black dark:text-white">
+                      First name
+                    </label>
+                    <input
+                      value={currentPatient?.firstname}
+                      type="text"
+                      name="firstname"
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3  outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary dark:text-white text-[18px]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2.5 block text-black dark:text-white">
+                      Last name
+                    </label>
+
+                    <input
+                      readOnly
+                      value={currentPatient?.lastname}
+                      type="text"
+                      name="lastname"
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3  text-[18px] outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary dark:text-white"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center  space-x-4">
+                  <div>
+                    <label className="mb-2.5 block text-black dark:text-white">
+                      Patient No
+                    </label>
+                    <input
+                      value={currentPatient?.patientno}
+                      readOnly
+                      type="text"
+                      name="patientno"
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3  text-[18px] outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary  dark:text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2.5 block text-black dark:text-white">
+                      gender
+                    </label>
+                    <input
+                      readOnly
+                      value={
+                        currentPatient?.genderid_id === "15M"
+                          ? "Male"
+                          : "Female"
+                      }
+                      type="text"
+                      name="gender"
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3  text-[18px] outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary  dark:text-white"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center  space-x-4">
+                  <div>
+                    <label className="mb-2.5 block text-black dark:text-white">
+                      Date of Birth
+                    </label>
+                    <input
+                      readOnly
+                      value={currentPatient?.birthdate.split("T")[0]}
+                      type="text"
+                      name="dob"
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-md text-[18px] outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary  dark:text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2.5 block text-black dark:text-white">
+                      Phone Number
+                    </label>
+                    <input
+                      value={currentPatient?.phone}
+                      type="text"
+                      name="phone"
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-[18px] outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary  dark:text-white"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center  space-x-4">
+                  <div>
+                    <label className="mb-2.5 block text-black dark:text-white">
+                      Address
+                    </label>
+                    <input
+                      value={currentPatient?.address}
+                      type="text"
+                      name="address"
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3  text-[18px] outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary dark:text-white"
+                    />
+                  </div>
+                </div>
+              </div>
+            </form>
+          </p>
           <div className="modal-action">
             <form method="dialog">
               {/* if there is a button in form, it will close the modal */}
@@ -82,7 +196,7 @@ function Proper({ currentPatient, existmodel, modelopen }) {
           </div>
         </div>
       </dialog>
-    </>
+    </div>
   );
 }
 
@@ -101,6 +215,9 @@ function TherapySession() {
   }, []);
 
   const handleSearch = async (value) => {
+    if (value.length < 2) {
+      setPatientData([]);
+    }
     if (value.length > 8) {
       setSearchPopup(true);
       console.log(value);
@@ -179,6 +296,7 @@ function TherapySession() {
                 placeholder="Enter your first name"
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
               />
+              <FormProper />
             </div>
             {/*  patient data results  div  */}
             {searchpopup && (
