@@ -3,6 +3,8 @@ import { handleClientScriptLoad } from "next/script";
 import React, { useEffect } from "react";
 import axios from "../../_lib/axios/axios";
 import { convertToObject } from "typescript";
+import { useSnackbar } from "notistack";
+import { redirect } from "next/dist/server/api-utils";
 
 function Proper({ currentPatient, existmodel, modelopen }) {
   console.log(currentPatient);
@@ -52,6 +54,12 @@ function Proper({ currentPatient, existmodel, modelopen }) {
               onClick={(e) => {
                 e.preventDefault();
                 document.getElementById("form_model_proper").showModal();
+                const modal = document.getElementById("my_modal_not_exists");
+
+                if (modal) {
+                  modal.removeAttribute("open");
+                  modal.remove();
+                }
               }}
             >
               Proceed
@@ -75,18 +83,54 @@ function Proper({ currentPatient, existmodel, modelopen }) {
 }
 function FormProper() {
   // get from local storage
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
   const currentPatient = JSON.parse(
     localStorage.getItem("currentPatient_Physio")
   );
+  const formSubmit = async (currentPatient) => {
+    closeSnackbar();
 
+    try {
+      const response = await axios.post("/patients/create/", {
+        firstname: currentPatient?.firstname,
+        lastname: currentPatient?.lastname,
+        patientno: currentPatient?.patientno,
+        gender: currentPatient?.genderid_id === "15M" ? "MALE" : "FEMALE",
+        dob: currentPatient?.birthdate?.split("T")[0],
+        phoneno: currentPatient?.phone,
+        address: currentPatient?.address,
+      });
+      const modal = document.getElementById("form_model_proper");
+      console.log(modal);
+      
+
+      if (response.status === 200) {
+        enqueueSnackbar("Patient Created", { variant: "success" });
+        window.location.reload();
+        // const modal = document.getElementById("form_model_proper");
+        // console.log(modal);
+        // if (modal) {
+        //   modal.removeAttribute("open");
+        // }
+        console.log(response.data);
+        
+
+      }
+    } catch (error) {
+      console.log(error);
+      console.error(error);
+      enqueueSnackbar("Error creating patient", { variant: "error" });
+    }
+  };
   return (
     <div>
       <dialog id="form_model_proper" className="modal">
         <div className="modal-box   bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
           <h3 className="font-bold text-lg">Create Patient</h3>
 
-          <p className="py-4 text-xl text-black">
-            <form>
+          <div className="py-4 text-xl text-black">
+            <form onSubmit={formSubmit} action="#" method="post">
               <div className="mb-4.5 flex flex-col ">
                 <div className="flex items-center  space-x-4">
                   <div>
@@ -153,7 +197,7 @@ function FormProper() {
                     </label>
                     <input
                       readOnly
-                      value={currentPatient?.birthdate.split("T")[0]}
+                      value={currentPatient?.birthdate?.split("T")[0]}
                       type="text"
                       name="dob"
                       className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-md text-[18px] outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary  dark:text-white"
@@ -186,14 +230,28 @@ function FormProper() {
                   </div>
                 </div>
               </div>
-            </form>
-          </p>
-          <div className="modal-action">
-            <form method="dialog">
-              {/* if there is a button in form, it will close the modal */}
-              <button className="btn">Close</button>
+              <div>
+                <button
+                  className="btn"
+                  type="submit"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    formSubmit(currentPatient);
+                  }}
+                >
+                  Submit
+                </button>
+              </div>
             </form>
           </div>
+          {/* <div className="modal-action">
+            <form method="dialog">
+              
+              <button className="btn" type="submit">
+                Submit
+              </button>
+            </form>
+          </div> */}
         </div>
       </dialog>
     </div>
