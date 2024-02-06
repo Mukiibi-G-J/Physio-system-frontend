@@ -1,16 +1,19 @@
 "use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   ColumnDef,
   flexRender,
+  ColumnFiltersState,
   getCoreRowModel,
   useReactTable,
   SortingState,
   getSortedRowModel,
   getPaginationRowModel,
+  getFilteredRowModel,
 } from "@tanstack/react-table";
 
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -31,8 +34,10 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
   const table = useReactTable({
     data,
     columns,
@@ -40,14 +45,37 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
+      columnFilters,
     },
   });
 
   return (
     <>
-      {" "}
+      <div className="flex items-center py-4">
+        {/* <Input
+          placeholder="Filter lastname..."
+          value={(table.getColumn("lastname")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("lastname")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        /> */}
+        {/*  SEARCH FOR ALL THE DATA COlUMNS */}
+
+        <Input
+          placeholder="Filter..."
+          value={
+            (table.getColumn("lastname")?.getFilterFn() as string) ??
+            (table.getColumn("firstname")?.getFilterFn() as string) ??
+            (table.getColumn("patientno")?.getFilterFn() as string) ??
+            ""
+          }
+        />
+      </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -98,6 +126,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
+
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button
           variant="outline"
